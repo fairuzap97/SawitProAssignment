@@ -1,0 +1,288 @@
+# This is the OpenAPI specification for your service. It is used to generate the client code.
+# To generate the server code, use the Gradle task `openApiGenerate`. The 
+# generated code will be placed in `build/generate-resources/main`.
+#
+# We will evaluate you based on how well you design your API.
+# 1. How well it follows REST principles.
+# 2. How easy it is to understand and use.
+#
+# References
+# 1. https://swagger.io/specification/
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: User Service
+  license:
+    name: MIT
+servers:
+  - url: http://localhost
+paths:
+  /user/session:
+    post:
+      summary: Login API. Create new session for the target user.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginUserRequest"
+      responses:
+        '200':
+          description: Success Register
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginUserResponse"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadLoginRequestError"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /user:
+    post:
+      summary: Register new user with the provided phone number, full name, and password.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterUserRequest"
+      responses:
+        '200':
+          description: Success Register
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/RegisterUserResponse"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorsResponse"
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictUserRequestError"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    get:
+      summary: Get logged-in user profile
+      operationId: getUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Success Register
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUserResponse"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      summary: Update logged-in user profile
+      operationId: updateUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        '200':
+          description: Success Register
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateUserResponse"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FieldErrorsResponse"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForbiddenErrorResponse"
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictUserRequestError"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginUserRequest:
+      type: object
+      required:
+        - phone_no
+        - password
+      properties:
+        phone_no:
+          type: string
+          example: "+6281510137722"
+        password:
+          type: string
+          example: "SampleVal1dP@ssword"
+    LoginUserResponse:
+      type: object
+      required:
+        - jwt_token
+      properties:
+        jwt_token:
+          type: string
+          example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTA1NTM5NTMsInN1YiI6IjEzIn0.hpYC0VTNTBg2HNcCIWRA66tC6FKhgikAwSbomgYCG95TSK8ZIjjEdqsiLytxuKXaKlfREpGJoRcxybpTt1DpfpdyWQGSSbVosi9lC-NWrNraDa1PA9NaE186_GD8c8AWN1-LU41AWZkPBw2dnI3FEEzSCjAARQ8arnOx3a0Haoo"
+    RegisterUserRequest:
+      type: object
+      required:
+        - phone_no
+        - full_name
+        - password
+      properties:
+        phone_no:
+          type: string
+          example: "+6281510137722"
+        full_name:
+          type: string
+          example: "John Smith"
+        password:
+          type: string
+          example: "SampleVal1dP@ssword"
+    RegisterUserResponse:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: integer
+          example: 12
+    GetUserResponse:
+      type: object
+      required:
+        - user_id
+        - phone_no
+        - full_name
+        - successful_login_count
+      properties:
+        user_id:
+          type: integer
+          example: 12
+        phone_no:
+          type: string
+          example: "+6281510137722"
+        full_name:
+          type: string
+          example: "John Smith"
+        successful_login_count:
+          type: integer
+          example: 42
+    UpdateUserRequest:
+      type: object
+      properties:
+        phone_no:
+          type: string
+          example: "+6281510137722"
+        full_name:
+          type: string
+          example: "John Smith"
+    UpdateUserResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: "record updated successfully"
+    FieldErrorsResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - error
+            properties:
+              field:
+                type: string
+                example: "phone_no"
+              error:
+                type: string
+                example: "besides the country code, phone_no must only contain numbers"
+    ConflictUserRequestError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "user record conflict, phone number must be unique"
+    BadLoginRequestError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "invalid phone number or password"
+    ForbiddenErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "invalid / expired token, please login again"
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "pq: failed connecting to database"
